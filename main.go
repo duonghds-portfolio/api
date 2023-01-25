@@ -11,29 +11,29 @@ import (
 
 const (
 	PostContactPath = "/api/contact"
+	GetNotesPath    = "/api/notes"
+	PutNotePath     = "/api/note"
 )
 
 func HandleRequest(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	if req.HTTPMethod == http.MethodGet {
-		return events.APIGatewayProxyResponse{
-			Body:       "error: method get not allowed with this url",
-			StatusCode: http.StatusMethodNotAllowed,
-		}, nil
+		switch req.Path {
+		case GetNotesPath:
+			dynamo.Init()
+			return handler.GetNotes(req.Body)
+		default:
+			return handler.CreateResponse("error: url/api not exists", http.StatusNotFound)
+		}
 	}
 	switch req.Path {
 	case PostContactPath:
 		dynamo.Init()
 		return handler.PostContact(req.Body)
+	case PutNotePath:
+		dynamo.Init()
+		return handler.PutNote(req.Body)
 	default:
-		return events.APIGatewayProxyResponse{
-			Body:       "error: url/api not exists",
-			StatusCode: http.StatusNotFound,
-			Headers: map[string]string{
-				"Access-Control-Allow-Headers": "Content-Type",
-				"Access-Control-Allow-Origin":  "*",
-				"Access-Control-Allow-Methods": "*",
-			},
-		}, nil
+		return handler.CreateResponse("error: url/api not exists", http.StatusNotFound)
 	}
 }
 
