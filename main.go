@@ -16,6 +16,8 @@ const (
 )
 
 func HandleRequest(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	dynamo.Init()
+	return handler.PostContact(req.Body)
 	if req.HTTPMethod == http.MethodGet {
 		switch req.Path {
 		case GetNotesPath:
